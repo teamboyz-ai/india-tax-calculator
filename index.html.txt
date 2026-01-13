@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>India Income Tax Calculator & Tax-Saving Ideas (FY 2024–25)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+      line-height: 1.5;
+    }
+    h1, h2, h3, h4 {
+      margin-top: 0.6em;
+      margin-bottom: 0.4em;
+    }
+    .section {
+      border: 1px solid #ddd;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border-radius: 6px;
+      background: #fff;
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+    }
+    input, select {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+    .two-column {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .two-column > div {
+      flex: 1 1 250px;
+    }
+    button {
+      padding: 10px 18px;
+      margin-top: 12px;
+      cursor: pointer;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+    }
+    button:hover {
+      background: #125399;
+    }
+    .result-box {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #0b7a0b;
+    }
+    .note {
+      font-size: 12px;
+      color: #555;
+      margin-top: 8px;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 8px;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>India Income Tax Calculator & Tax-Saving Ideas<br>
+    <small>FY 2024–25 (AY 2025–26)</small>
+  </h1>
+  <p>
+    Simple educational calculator for Indian residents. 
+    It compares <strong>Old vs New tax regime</strong> and suggests basic tax-saving ideas.
+    Does not handle all special cases (detailed capital gains, HRA, surcharge, etc.).
+  </p>
+
+  <!-- 1. Basic details -->
+  <div class="section">
+    <h2>1. Basic details</h2>
+    <div class="two-column">
+      <div>
+        <label>Age</label>
+        <input type="number" id="age" min="18" max="100" value="30">
+      </div>
+      <div>
+        <label>Are you a salaried employee?</label>
+        <select id="isSalaried">
+          <option value="yes" selected>Yes</option>
+          <option value="no">No (business / freelancer / other)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Income -->
+  <div class="section">
+    <h2>2. Annual income (₹)</h2>
+    <div class="two-column">
+      <div>
+        <label>Salary income (before tax, as per CTC / Form 16)</label>
+        <input type="number" id="salaryIncome" min="0" step="1000">
+      </div>
+      <div>
+        <label>Business / freelance profit</label>
+        <input type="number" id="businessIncome" min="0" step="1000">
+      </div>
+      <div>
+        <label>Rent received (net of municipal tax)</label>
+        <input type="number" id="rentIncome" min="0" step="1000">
+      </div>
+      <div>
+        <label>Interest & other income (FD, savings, etc.)</label>
+        <input type="number" id="otherIncome" min="0" step="1000">
+      </div>
+      <div>
+        <label>Capital gains (approx – treated here as normal income)</label>
+        <input type="number" id="capitalGains" min="0" step="1000">
+      </div>
+    </div>
+    <p class="note">
+      Note: In reality, many capital gains are taxed at special rates. 
+      For simplicity this tool treats them as normal slab income.
+    </p>
+  </div>
+
+  <!-- 3. Deductions -->
+  <div class="section">
+    <h2>3. Deductions & tax-saving (Old regime)</h2>
+    <div class="two-column">
+      <div>
+        <label>80C total (PF, PPF, ELSS, life insurance, home loan principal, etc.)</label>
+        <input type="number" id="d80c" min="0" step="1000">
+      </div>
+      <div>
+        <label>80D – Health insurance premium (total)</label>
+        <input type="number" id="d80d" min="0" step="1000">
+      </div>
+      <div>
+        <label>NPS – additional (80CCD(1B), max ₹50,000)</label>
+        <input type="number" id="d80ccd1b" min="0" step="1000">
+      </div>
+      <div>
+        <label>Education loan interest (80E)</label>
+        <input type="number" id="d80e" min="0" step="1000">
+      </div>
+      <div>
+        <label>Donations eligible under 80G (approx)</label>
+        <input type="number" id="d80g" min="0" step="1000">
+      </div>
+      <div>
+        <label>Home loan interest – self-occupied house (Section 24(b))</label>
+        <input type="number" id="homeLoanInterest" min="0" step="1000">
+      </div>
+    </div>
+    <p class="note">
+      These mainly matter under the <strong>Old tax regime</strong>. Under the New regime,
+      most of these deductions are not available (except standard deduction and a few others not covered here).
+    </p>
+  </div>
+
+  <!-- 4. Calculate -->
+  <div class="section">
+    <h2>4. Calculate</h2>
+    <button onclick="runCalculator()">Calculate Tax & Ideas</button>
+    <div id="error" class="error"></div>
+    <div id="results"></div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="section">
+    <h2>Disclaimer</h2>
+    <p class="note">
+      This is a <strong>simplified educational tool</strong> based on public slab rates for FY 2024–25 (AY 2025–26).
+      It does not cover all provisions (HRA, detailed capital gains rules, set-off of losses, surcharge, etc.).
+      Please treat results as an estimate and consult a qualified CA or tax professional 
+      before filing returns or making major financial decisions.
+    </p>
+  </div>
+
+  <script>
+    function getNumber(id) {
+      var v = parseFloat(document.getElementById(id).value);
+      return isNaN(v) ? 0 : v;
+    }
+
+    // Old regime tax slabs (FY 2024–25), with 87A rebate and 4% cess
+    function calculateOldRegimeTax(taxable) {
+      let tax = 0;
+
+      if (taxable <= 250000) {
+        tax = 0;
+      } else if (taxable <= 500000) {
+        tax = (taxable - 250000) * 0.05;
+      } else if (taxable <= 1000000) {
+        tax = 250000 * 0.05 + (taxable - 500000) * 0.20;
+      } else {
+        tax = 250000 * 0.05 + 500000 * 0.20 + (taxable - 1000000) * 0.30;
+      }
+
+      // Rebate u/s 87A if taxable income <= 5L (resident)
+      if (taxable <= 500000) {
+        tax = 0;
+      }
+
+      const cess = tax * 0.04;
+      return {
+        basicTax: Math.round(tax),
+        cess: Math.round(cess),
+        totalTax: Math.round(tax + cess)
+      };
+    }
+
+    // New regime tax slabs (FY 2024–25), with 87A rebate and 4% cess
+    function calculateNewRegimeTax(taxable) {
+      let tax = 0;
+
+      if (taxable <= 300000) {
+        tax = 0;
+      } else if (taxable <= 600000) {
+        tax = (taxable - 300000) * 0.05;
+      } else if (taxable <= 900000) {
+        tax = 300000 * 0.05 + (taxable - 600000) * 0.10;
+      } else if (taxable <= 1200000) {
+        tax = 300000 * 0.05 + 300000 * 0.10 + (taxable - 900000) * 0.15;
+      } else if (taxable <= 1500000) {
+        tax = 300000 * 0.05 + 300000 * 0.10 + 300000 * 0.15 + (taxable - 1200000) * 0.20;
+      } else {
+        tax = 300000 * 0.05 + 300000 * 0.10 + 300000 * 0.15 + 300000 * 0.20 + (taxable - 1500000) * 0.30;
+      }
+
+      // Rebate u/s 87A (new regime) if taxable income <= 7L
+      if (taxable <= 700000) {
+        tax = 0;
+      }
+
+      const cess = tax * 0.04;
+      return {
+        basicTax: Math.round(tax),
+        cess: Math.round(cess),
+        totalTax: Math.round(tax + cess)
+      };
+    }
+
+    function runCalculator() {
+      const errorDiv = document.getElementById('error');
+      const resultsDiv = document.getElementById('results');
+      errorDiv.textContent = '';
+      resultsDiv.innerHTML = '';
+
+      const age = getNumber('age');
+      const isSalaried = document.getElementById('isSalaried').value === 'yes';
+
+      if (!age || age < 18) {
+        errorDiv.textContent = 'Please enter a valid age (18 or above).';
+        return;
+      }
+
+      const salary   = getNumber('salaryIncome');
+      const business = getNumber('businessIncome');
+      const rent     = getNumber('rentIncome');
+      const other    = getNumber('otherIncome');
+      const capital  = getNumber('capitalGains');
+
+      const grossIncome = salary + business + rent + other + capital;
+
+      if (grossIncome <= 0) {
+        errorDiv.textContent = 'Please enter at least one positive income amount.';
+        return;
+      }
+
+      // Standard deduction for salaried/pensioner (simplified)
+      const standardDeduction = isSalaried ? 50000 : 0;
+      const incomeAfterStandard = Math.max(0, grossIncome - standardDeduction);
+
+      // Deductions for old regime
+      let d80c          = getNumber('d80c');
+      let d80d          = getNumber('d80d');
+      let d80ccd1b      = getNumber('d80ccd1b');
+      let d80e          = getNumber('d80e');
+      let d80g          = getNumber('d80g');
+      let homeLoanInt   = getNumber('homeLoanInterest');
+
+      const max80C            = 150000;
+      const max80CCD1B        = 50000;
+      const maxHomeLoanInt    = 200000;
+      const max80DCombined    = 75000; // simplified combined cap (self+family+parents)
+
+      const used80C           = Math.min(d80c, max80C);
+      const used80D           = Math.min(d80d, max80DCombined);
+      const used80CCD1B       = Math.min(d80ccd1b, max80CCD1B);
+      const usedHomeLoanInt   = Math.min(homeLoanInt, maxHomeLoanInt);
+
+      const totalDeductionsOld = used80C + used80D + used80CCD1B + d80e + d80g + usedHomeLoanInt;
+
+      const taxableOld = Math.max(0, incomeAfterStandard - totalDeductionsOld);
+      const taxableNew = Math.max(0, incomeAfterStandard); // most deductions not allowed in new regime
+
+      const oldResult = calculateOldRegimeTax(taxableOld);
+      const newResult = calculateNewRegimeTax(taxableNew);
+
+      const betterRegime =
+        oldResult.totalTax < newResult.totalTax ? 'Old' :
+        newResult.totalTax < oldResult.totalTax ? 'New' :
+        'Both similar';
+
+      // For tax-saving hints
+      const remaining80C      = Math.max(0, max80C - used80C);
+      const remaining80CCD1B  = Math.max(0, max80CCD1B - used80CCD1B);
+
+      // Approx marginal rate in old regime (for suggestion only)
+      let marginalRateOld = 0;
+      if (taxableOld > 1000000)      marginalRateOld = 0.30;
+      else if (taxableOld > 500000)  marginalRateOld = 0.20;
+      else if (taxableOld > 250000)  marginalRateOld = 0.05;
+      else                           marginalRateOld = 0;
+
+      let potential80CSaving = Math.round(remaining80C * marginalRateOld);
+      let potentialNpsSaving = Math.round(remaining80CCD1B * marginalRateOld);
+
+      let html = '';
+
+      html += '<div class="result-box">';
+      html += '<h3>Tax summary</h3>';
+      html += '<p><strong>Gross total income:</strong> ₹' + grossIncome.toLocaleString('en-IN') + '</p>';
+      html += '<p><strong>Standard deduction:</strong> ₹' + standardDeduction.toLocaleString('en-IN') + '</p>';
+      html += '<p><strong>Income after standard deduction:</strong> ₹' + incomeAfterStandard.toLocaleString('en-IN') + '</p>';
+
+      html += '<h4>Old tax regime</h4>';
+      html += '<p>Eligible deductions (approx): ₹' + totalDeductionsOld.toLocaleString('en-IN') + '</p>';
+      html += '<p>Taxable income (Old regime): ₹' + taxableOld.toLocaleString('en-IN') + '</p>';
+      html += '<p>Income tax (before cess): ₹' + oldResult.basicTax.toLocaleString('en-IN') + '</p>';
+      html += '<p>Health & education cess (4%): ₹' + oldResult.cess.toLocaleString('en-IN') + '</p>';
+      html += '<p><strong>Total tax – Old regime:</strong> ₹' + oldResult.totalTax.toLocaleString('en-IN') + '</p>';
+
+      html += '<h4>New tax regime</h4>';
+      html += '<p>Taxable income (New regime): ₹' + taxableNew.toLocaleString('en-IN') + '</p>';
+      html += '<p>Income tax (before cess): ₹' + newResult.basicTax.toLocaleString('en-IN') + '</p>';
+      html += '<p>Health & education cess (4%): ₹' + newResult.cess.toLocaleString('en-IN') + '</p>';
+      html += '<p><strong>Total tax – New regime:</strong> ₹' + newResult.totalTax.toLocaleString('en-IN') + '</p>';
+
+      html += '<p class="highlight">Recommended regime (based only on lower tax): ' + betterRegime + ' regime</p>';
+      html += '</div>';
+
+      html += '<div class="result-box">';
+      html += '<h3>Tax-saving ideas (Old regime)</h3>';
+      html += '<ul>';
+
+      if (remaining80C > 0 && marginalRateOld > 0) {
+        html += '<li>You still have unused <strong>80C limit</strong> of about ₹' +
+                remaining80C.toLocaleString('en-IN') +
+                '. If you choose the Old regime, investing this in 80C options ' +
+                '(EPF, PPF, ELSS, home-loan principal, term insurance premium, etc.) ' +
+                'could reduce your tax by up to about ₹' +
+                potential80CSaving.toLocaleString('en-IN') +
+                ' (approx., based on your slab).</li>';
+      } else {
+        html += '<li>You are already using your full 80C limit of ₹1,50,000, ' +
+                'or your taxable income is in a low/zero slab where extra 80C doesn\'t help much.</li>';
+      }
+
+      if (remaining80CCD1B > 0 && marginalRateOld > 0) {
+        html += '<li>Under <strong>NPS (80CCD(1B))</strong>, you can still invest about ₹' +
+                remaining80CCD1B.toLocaleString('en-IN') +
+                ' extra and get additional deduction. This could save around ₹' +
+                potentialNpsSaving.toLocaleString('en-IN') +
+                ' in tax (approx.) in the Old regime.</li>';
+      } else {
+        html += '<li>You are already at or near the additional NPS limit of ₹50,000 ' +
+                'under 80CCD(1B), or your Old-regime slab benefit is low.</li>';
+      }
+
+      html += '<li>Premiums for <strong>health insurance</strong> are deductible under 80D ' +
+              '(within limits). Beyond tax-saving, adequate health cover ' +
+              '(e.g., ₹5–10 lakh family floater) is important for protection.</li>';
+
+      html += '<li>If you have a home loan on a self-occupied house, interest up to ' +
+              '₹2,00,000 per year is deductible under <strong>Section 24(b)</strong> ' +
+              'in the Old regime.</li>';
+
+      html += '<li>Do not buy poor financial products only to save tax. First check if ' +
+              'they suit your goals (returns, lock-in period, risk), then see the tax ' +
+              'benefit as a bonus.</li>';
+
+      html += '</ul>';
+      html += '</div>';
+
+      resultsDiv.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
